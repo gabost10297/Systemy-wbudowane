@@ -1,0 +1,161 @@
+// PIC24FJ128GA010 Configuration Bit Settings
+
+// For more on Configuration Bits, see Section 1.1
+
+// consult your device data sheet
+
+// CONFIG2
+
+#pragma config POSCMOD = XT // XT Oscillator mode selected
+
+#pragma config OSCIOFNC = ON // OSC2/CLKO/RC15 as port I/O (RC15)
+
+#pragma config FCKSM = CSDCMD // Clock Switching and Monitor disabled
+
+#pragma config FNOSC = PRI // Primary Oscillator (XT, HS, EC)
+
+#pragma config IESO = ON // Int Ext Switch Over Mode enabled
+
+// CONFIG1
+
+#pragma config WDTPS = PS32768 // Watchdog Timer Postscaler (1:32,768)
+
+#pragma config FWPSA = PR128 // WDT Prescaler (1:128)
+
+#pragma config WINDIS = ON // Watchdog Timer Window Mode disabled
+
+#pragma config FWDTEN = OFF // Watchdog Timer disabled
+
+#pragma config ICS = PGx2 // Emulator/debugger uses EMUC2/EMUD2
+
+#pragma config GWRP = OFF // Writes to program memory allowed
+
+#pragma config GCP = OFF // Code protection is disabled
+
+#pragma config JTAGEN = OFF // JTAG port is disabled
+
+// #pragma config statements should precede project file includes.
+
+// Use project enums instead of #define for ON and OFF.
+
+#include <xc.h>
+
+#include <libpic30.h>
+
+#include <stdio.h>
+
+#include <string.h>
+
+#include "lcd.h"
+
+#include "buttons.h"
+
+int main(void) {
+
+    LCD_Initialize();
+
+    int czas_gracza1 = 180;
+
+    int czas_gracza2 = 180;
+
+    int zegar1_tyka = 0;
+
+    int zegar2_tyka = 0;
+ 
+    int stoper = 0;
+
+    char tekst_na_ekran[17];
+
+    while(1) {
+ 
+        if (BUTTON_IsPressed(BUTTON_S3) == true) {
+
+            if (czas_gracza1 > 0 && czas_gracza2 > 0) {
+
+                zegar1_tyka = 0;
+
+                zegar2_tyka = 1;
+
+            }
+
+        }
+
+        if (BUTTON_IsPressed(BUTTON_S4) == true) {
+
+            if (czas_gracza1 > 0 && czas_gracza2 > 0) {
+
+                zegar1_tyka = 1;
+
+                zegar2_tyka = 0;
+
+            }
+
+        }
+
+
+        stoper = stoper + 1;
+
+        if (stoper == 10) {
+
+            if (zegar1_tyka == 1) {
+
+                czas_gracza1 = czas_gracza1 - 1;
+
+            }
+
+            if (zegar2_tyka == 1) {
+
+                czas_gracza2 = czas_gracza2 - 1;
+
+            }
+
+            stoper = 0;
+
+        }
+
+        if (czas_gracza1 == 0 || czas_gracza2 == 0) {
+
+            zegar1_tyka = 0;
+
+            zegar2_tyka = 0;
+
+        }
+
+        LCD_ClearScreen();
+
+        if (czas_gracza1 == 0) {
+
+            sprintf(tekst_na_ekran, "G1 PRZEGRAL CZAS");
+
+        } 
+
+        else if (czas_gracza2 == 0) {
+
+            sprintf(tekst_na_ekran, "G2 PRZEGRAL CZAS");
+
+        } 
+
+        else {
+ 
+            int min1 = czas_gracza1 / 60;
+
+            int sek1 = czas_gracza1 % 60;
+
+            int min2 = czas_gracza2 / 60;
+
+            int sek2 = czas_gracza2 % 60;
+ 
+            sprintf(tekst_na_ekran, "G1 %02u:%02u G2 %02u:%02u", min1, sek1, min2, sek2);
+
+        }
+
+        LCD_PutString(tekst_na_ekran, strlen(tekst_na_ekran));
+ 
+        __delay32(400000);
+
+    }
+
+    return 0;
+
+}
+ 
